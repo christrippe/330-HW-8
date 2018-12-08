@@ -1,0 +1,80 @@
+---
+title: "330-HW-8"
+author: "Chris Trippe"
+date: "12/7/2018"
+output: html_document
+---
+```{r, message = FALSE, echo = FALSE}
+##Libraries used
+library(tidyverse)
+library(MASS)
+library(bestglm)
+library(GGally)
+library(car)
+library(gridExtra)
+library(pROC)
+```
+
+```{r}
+##Read in data
+bike_data <- read.csv("Bikes.csv")
+```
+
+1. In your own words, summarize the overarching problem. Discuss how statistical modeling will be able to answer the posed questions.
+
+```{r}
+
+```
+
+2. Explain why traditional multiple linear regression methods are not (perfectly) suitable for this problem (even if they are approximately suitable).
+
+The multiple linear regression method does not necessarily account for a discrete response varible. In this case, the response variable is the number of bikes rented which is a count. When making predictions, the estimates for the number of bikes that will be rented is not guaranteed to be an integer. On top of that, we are likely to violate the linear assumption, the errors or residuals won't be normal, and equal variance of the residuals is likely to be violated.
+
+3. Use variable selection to choose which variables to use in a Poisson regression model for cnt. Provide a justification of your choice in using AIC, BIC or CV. What factors do you find are important in predicting the number of bikes rented?
+
+```{r}
+vs.res <- bestglm(bike_data, IC = "BIC", method = "exhaustive", family = poisson)
+
+best_slr <- vs.res$BestModel
+# summary(best_slr)
+
+plot(vs.res$Subsets$BIC,type="b",pch=19,xlab="# of Vars",
+ylab="BIC") 
+
+summary(best_slr)
+```
+
+```{r}
+vs.res <- bestglm(bike_data, IC = "AIC", method = "exhaustive", family = poisson)
+
+best_slr <- vs.res$BestModel
+# summary(best_slr)
+
+plot(vs.res$Subsets$AIC,type="b",pch=19,xlab="# of Vars",
+ylab="AIC") 
+
+summary(best_slr)
+```
+
+AIC and BIC are same in this case.
+
+4. Write out a Poisson regression model (using greek letters) that includes your chosen covariates. Describe and justify any assumptions that you use in writing out your model.
+
+I'm thinkng independence is the only assumption? Unsure.
+
+```{r}
+
+```
+
+5. Fit the corresponding Poisson regression model and give a 95% confidence interval for each effect therein. Interpret at least one (but not the intercept) of these intervals in the context of the problem and NOT as log-effects.
+
+```{r}
+
+```
+
+6. Predict the average number of bikes rented (and construct a 95% confidence interval for the predicted mean) for the following day: season=“Spring”, yr=“2012”, holiday=“No”, workingday=“Yes”, weathersit=“Misty”, temp=0.34, hum=0.80, windspeed=0.18. Interpret your interval in context.
+
+```{r}
+
+```
+
