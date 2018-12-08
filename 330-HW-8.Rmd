@@ -18,31 +18,20 @@ library(pROC)
 ```{r}
 ##Read in data
 bike_data <- read.csv("Bikes.csv")
+bike_data$yr <- as.factor(bike_data$yr)
 ```
 
 1. In your own words, summarize the overarching problem. Discuss how statistical modeling will be able to answer the posed questions.
 
-```{r}
+Bike sharing systems are becoming increasingly popular arcouss the world with over 500 bikesharing programs composed of over 500,000 bicycles. These systems have attracted much interest becasue of their effects on traffic, enviromental and health issues. 
 
-```
+The data collected includes information on the year, season, weather, tepmerature, humidity, and windspeed on a particular day as well as wether that day was a holiday, working day, or neither. The purpose of this study is to examine which of these variables, if any, effect the number of bikes rented and how they effect it. A model will be designed to best predict the number of bikes that will be rented according to the particular characteristics of a given day. 
 
 2. Explain why traditional multiple linear regression methods are not (perfectly) suitable for this problem (even if they are approximately suitable).
 
 The multiple linear regression method does not necessarily account for a discrete response varible. In this case, the response variable is the number of bikes rented which is a count. When making predictions, the estimates for the number of bikes that will be rented is not guaranteed to be an integer. On top of that, we are likely to violate the linear assumption, the errors or residuals won't be normal, and equal variance of the residuals is likely to be violated.
 
 3. Use variable selection to choose which variables to use in a Poisson regression model for cnt. Provide a justification of your choice in using AIC, BIC or CV. What factors do you find are important in predicting the number of bikes rented?
-
-```{r}
-vs.res <- bestglm(bike_data, IC = "BIC", method = "exhaustive", family = poisson)
-
-best_slr <- vs.res$BestModel
-# summary(best_slr)
-
-plot(vs.res$Subsets$BIC,type="b",pch=19,xlab="# of Vars",
-ylab="BIC") 
-
-summary(best_slr)
-```
 
 ```{r}
 vs.res <- bestglm(bike_data, IC = "AIC", method = "exhaustive", family = poisson)
@@ -56,9 +45,11 @@ ylab="AIC")
 summary(best_slr)
 ```
 
-AIC and BIC are same in this case.
+Since the importance of this model is to predict estimates, the AIC method, which is the best method to use when creating a prediction model, is the best method to use when picking significant variables. In order to test all possible models, we used the exhaustive model and every model of every possible size will be tested. The one with the lowest AIC is chosen. In this case, our model is significantly effected by the season when it's spring, summer or winter, the year when it's 2012, whether the day is a holiday or working day, the weather when it's misty or lightly precipitating, the temperatuere, the humidity and the windspeed. 
 
 4. Write out a Poisson regression model (using greek letters) that includes your chosen covariates. Describe and justify any assumptions that you use in writing out your model.
+
+$log(num\_of\_rentals_i) = \beta_0 + \beta_1I(season = Spring) + \\ \beta_2I(season = Summer) + \beta_3I(season = Winter) + \\ \beta_4I(yr = 2012) + \beta_5I(holiday = Yes) + \beta_6I(workingday = Yes) + \\ \beta_7I(weather = Light Precip) + \beta_8I(weather = Misty) + \\ \beta_9temp_i + \beta_{10}hum_i + \beta_{11}windspeed_i$
 
 I'm thinkng independence is the only assumption? Unsure.
 
