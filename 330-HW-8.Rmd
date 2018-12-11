@@ -48,14 +48,19 @@ summary(best_slr)
 Since the importance of this model is to predict estimates, the AIC method, which is the best method to use when creating a prediction model, is the best method to use when picking significant variables. In order to test all possible models, we used the exhaustive model and every model of every possible size will be tested. The one with the lowest AIC is chosen. In this case, our model is significantly effected by the season when it's spring, summer or winter, the year when it's 2012, whether the day is a holiday or working day, the weather when it's misty or lightly precipitating, the temperatuere, the humidity and the windspeed. 
 
 4. Write out a Poisson regression model (using greek letters) that includes your chosen covariates. Describe and justify any assumptions that you use in writing out your model.
-
+$Y_i \overset{ind}{\sim} Pois(num\_of\_rentals_i)$
 $log(num\_of\_rentals_i) = \beta_0 + \beta_1I(season = Spring) + \\ \beta_2I(season = Summer) + \beta_3I(season = Winter) + \\ \beta_4I(yr = 2012) + \beta_5I(holiday = Yes) + \beta_6I(workingday = Yes) + \\ \beta_7I(weather = Light Precip) + \beta_8I(weather = Misty) + \\ \beta_9temp_i + \beta_{10}hum_i + \beta_{11}windspeed_i$
 
-I'm thinkng independence is the only assumption? Unsure.
 
-```{r}
+```{r, fig.height = 4, fig.width = 4, echo = FALSE, message = FALSE}
+log_slr <- glm(log(cnt)~., data = bike_data, family = "poisson")
 
+avPlot(log_slr, variable = "temp")
+avPlot(log_slr, variable = "hum")
+avPlot(log_slr, variable = "windspeed")
 ```
+
+Our assumptions for this model are that it's a poisson distribution where the log number of rentals has a linear relationship with the exlanitory variables and the number of bikes rented on a given day are independent. One of the potential problems with independence is if workdays or non-workdays were recorded consecutively. There is reason to believe that two workdays or non-workdays that occur back to back would have simialr results. We will assume this is not the case and that the number of bikes rented on one day is independent of another day. As for linearity, the added-variable plots for the quantitative variables appear to produce linear relationships, so we can conclude that the poisson model is approximately linear. 
 
 5. Fit the corresponding Poisson regression model and give a 95% confidence interval for each effect therein. Interpret at least one (but not the intercept) of these intervals in the context of the problem and NOT as log-effects.
 
