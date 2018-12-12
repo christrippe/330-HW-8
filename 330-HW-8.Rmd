@@ -1,6 +1,6 @@
 ---
 title: "330-HW-8"
-author: "Chris Trippe"
+author: "Chris Trippe and Ethan Kemeny"
 date: "12/7/2018"
 output: html_document
 ---
@@ -25,19 +25,19 @@ bike_data <- read.csv("Bikes.csv")
 bike_data$yr <- as.factor(bike_data$yr)
 ```
 
-1. In your own words, summarize the overarching problem. Discuss how statistical modeling will be able to answer the posed questions.
+1. 
 
 Bike sharing systems are becoming increasingly popular arcouss the world with over 500 bikesharing programs composed of over 500,000 bicycles. These systems have attracted much interest becasue of their effects on traffic, enviromental and health issues. 
 
 The data collected includes information on the year, season, weather, tepmerature, humidity, and windspeed on a particular day as well as wether that day was a holiday, working day, or neither. The purpose of this study is to examine which of these variables, if any, effect the number of bikes rented and how they effect it. A model will be designed to best predict the number of bikes that will be rented according to the particular characteristics of a given day. 
 
-2. Explain why traditional multiple linear regression methods are not (perfectly) suitable for this problem (even if they are approximately suitable).
+2. 
 
 The multiple linear regression method does not necessarily account for a discrete response varible. In this case, the response variable is the number of bikes rented which is a count. When making predictions, the estimates for the number of bikes that will be rented is not guaranteed to be an integer. On top of that, we are likely to violate the linear assumption, the errors or residuals won't be normal, and equal variance of the residuals is likely to be violated.
 
-3. Use variable selection to choose which variables to use in a Poisson regression model for cnt. Provide a justification of your choice in using AIC, BIC or CV. What factors do you find are important in predicting the number of bikes rented?
+3. 
 
-```{r}
+```{r, fig.height = 4, fig.width=6}
 vs.res <- bestglm(bike_data, IC = "AIC", method = "exhaustive", family = poisson)
 
 best_slr <- vs.res$BestModel
@@ -51,7 +51,8 @@ summary(best_slr)$coefficients %>% round(4) %>% knitr::kable(align = "c")
 
 Since the importance of this model is to predict estimates, the AIC method, which is the best method to use when creating a prediction model, is the best method to use when picking significant variables. In order to test all possible models, we used the exhaustive model and every model of every possible size will be tested. The one with the lowest AIC is chosen. In this case, our model is significantly effected by the season when it's spring, summer or winter, the year when it's 2012, whether the day is a holiday or working day, the weather when it's misty or lightly precipitating, the temperatuere, the humidity and the windspeed. 
 
-4. Write out a Poisson regression model (using greek letters) that includes your chosen covariates. Describe and justify any assumptions that you use in writing out your model.  
+4. 
+
 $Y_i \overset{ind}{\sim} Pois(num\_of\_rentals_i)$
 
 $log(num\_of\_rentals_i) = \beta_0 + \beta_1I(season = Spring) +  \beta_2I(season = Summer) + \beta_3I(season = Winter) + \\ \beta_4I(yr = 2012) + \beta_5I(holiday = Yes) + \beta_6I(workingday = Yes) + \beta_7I(weather = Light Precip) + \\ \beta_8I(weather = Misty) +  \beta_9temp_i + \beta_{10}hum_i + \beta_{11}windspeed_i$
@@ -67,8 +68,9 @@ avPlot(log_slr, variable = "windspeed")
 
 Our assumptions for this model are that it's a poisson distribution where the log number of rentals has a linear relationship with the exlanitory variables and the number of bikes rented on a given day are independent. One of the potential problems with independence is if workdays or non-workdays were recorded consecutively. There is reason to believe that two workdays or non-workdays that occur back to back would have simialr results. We will assume this is not the case and that the number of bikes rented on one day is independent of another day. As for linearity, the added-variable plots for the quantitative variables appear to produce linear relationships, so we can conclude that the poisson model is approximately linear. 
 
-5. Fit the corresponding Poisson regression model and give a 95% confidence interval for each effect therein. Interpret at least one (but not the intercept) of these intervals in the context of the problem and NOT as log-effects.
+5. 
 
+The following table includes 95% confidence intervals for $e^{\beta_i}$:
 ```{r}
 conf.table <- confint((best_slr)) %>% exp() %>% round(3)
 conf.frame <- data.frame(Variable = row.names(conf.table), Lower.Bound = conf.table[,1], Upper.Bound = conf.table[,2],row.names = NULL )
@@ -84,8 +86,8 @@ dframe <- data.frame(season= "Spring", yr="2012", holiday="No", workingday="Yes"
 
 
 log.mean <- predict.glm(best_slr,dframe,se.fit = TRUE)
-int.low <- log.mean$fit - qnorm(0.975)*log.mean$se.fit %>% exp() %>% round(3)
-int.up <- log.mean$fit + qnorm(0.975)*log.mean$se.fit %>% exp() %>% round(3)
+int.low <- (log.mean$fit - qnorm(0.975)*log.mean$se.fit) %>% exp() %>% round(3)
+int.up <- (log.mean$fit + qnorm(0.975)*log.mean$se.fit) %>% exp() %>% round(3)
 pred.mean <- log.mean$fit %>% exp() %>% round(3)
 
 
